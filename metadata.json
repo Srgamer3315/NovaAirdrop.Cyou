@@ -1,0 +1,6 @@
+{
+  "name": "Nova Airdrop",
+  "description": "Official Nova Network Airdrop Portal website for participant eligibility verification and record management.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

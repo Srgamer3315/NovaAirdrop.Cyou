@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: X authentication and participant eligibility
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/x/start:
+    get:
+      operationId: startXOAuth
+      tags: [auth]
+      summary: Begin X OAuth sign-in
+      description: Creates a one-time PKCE challenge and redirects to X, or back to the portal with a safe error code if sign-in cannot start.
+      responses:
+        "302":
+          description: Redirect to X authorization or back to the portal with a safe error code
+          headers:
+            Location:
+              schema:
+                type: string
+  /auth/x/callback:
+    get:
+      operationId: completeXOAuth
+      tags: [auth]
+      summary: Complete X OAuth sign-in
+      description: Validates OAuth state, exchanges the authorization code, and fetches the X profile and verification snapshot. A valid authenticated X profile is the only current eligibility requirement; the verification badge is informational and no engagement actions are required.
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: error
+          in: query
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect back to the participant app after success or a recoverable failure
+          headers:
+            Location:
+              schema:
+                type: string
+  /auth/session:
+    get:
+      operationId: getAuthSession
+      tags: [auth]
+      summary: Get the current participant session
+      description: Returns the signed-in participant and the X verification snapshot saved during OAuth, or an unauthenticated session. Eligibility currently requires successful X account authentication only; X verification is informational.
+      responses:
+        "200":
+          description: Current session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "500":
+          description: Session or database unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /auth/logout:
+    post:
+      operationId: logoutParticipant
+      tags: [auth]
+      summary: End the current participant session
+      responses:
+        "200":
+          description: Session ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResult"
+        "500":
+          description: Session could not be ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    AuthSession:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/Participant"
+            - type: "null"
+      required:
+        - authenticated
+        - user
+    Participant:
+      type: object
+      properties:
+        xUserId:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
+        profileImageUrl:
+          type: ["string", "null"]
+        xVerified:
+          type: ["boolean", "null"]
+          description: Informational X verification snapshot; it is not required for eligibility.
+        xVerifiedType:
+          type: ["string", "null"]
+        eligibilityStatus:
+          type: string
+          enum: [eligible]
+          description: Eligible after successful X account authentication. No follow, like, or repost actions are currently required.
+        firstAuthenticatedAt:
+          type: string
+          format: date-time
+        lastAuthenticatedAt:
+          type: string
+          format: date-time
+      required:
+        - xUserId
+        - username
+        - name
+        - profileImageUrl
+        - xVerified
+        - xVerifiedType
+        - eligibilityStatus
+        - firstAuthenticatedAt
+        - lastAuthenticatedAt
+    LogoutResult:
+      type: object
+      properties:
+        loggedOut:
+          type: boolean
+      required:
+        - loggedOut
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+

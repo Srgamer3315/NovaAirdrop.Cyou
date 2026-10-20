@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Nova Airdrop"
+description = "An airdrop sign-in app where participants authenticate with X, have their X verification status checked, and have their eligibility recorded securely in MongoDB."
+version = "1.0.0"
+id = "artifacts/nova-airdrop"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19356
+
+[services.development]
+run = "pnpm --filter @workspace/nova-airdrop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nova-airdrop", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nova-airdrop/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19356"
+BASE_PATH = "/"

@@ -1,0 +1,1 @@
+- [Mongo session cleanup](mongo-session-cleanup.md) — connect-mongo v6's native expiry index connects eagerly; choose cleanup mode deliberately to control startup behavior.

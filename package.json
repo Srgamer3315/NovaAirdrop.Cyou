@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "scripts"
+  ],
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "npm run build --workspace=@workspace/nova-airdrop",
+    "start": "tsx server.ts",
+    "lint": "tsc --build",
+    "typecheck": "tsc --build"
+  },
+  "private": true,
+  "dependencies": {
+    "@workspace/api-server": "*",
+    "@workspace/nova-airdrop": "*",
+    "express": "^5.2.1",
+    "firebase": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.3",
+    "prettier": "^3.9.6",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.2"
+  }
+}
